@@ -67,7 +67,12 @@ ui <- fluidPage(
     ),
     
     mainPanel(
-      plotOutput("plot"),
+      plotOutput("plot",
+                 dblclick = "plot_dblclick",
+                 brush = brushOpts(
+                   id = "plot_brush",
+                   resetOnNew = TRUE
+                 )),
       verbatimTextOutput("desc")
     )
   )

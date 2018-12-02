@@ -39,7 +39,7 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       h3("First strategy:"),
-      numericInput("fraction", 
+      sliderInput("fraction", 
                    "Fraction:",
                    min = 0, 
                    max = 1, 
@@ -48,12 +48,12 @@ ui <- fluidPage(
       checkboxInput("currency",
                     "Use actual currency",
                     value = FALSE),
-      actionButton("compare",
-                   "Toggle second strategy",
+      checkboxInput("compare",
+                   "Show secondary strategy",
                    value = FALSE),
       hidden(
         h3(id="secondaryTitle", "Second strategy:"),
-        numericInput("fractionSecondary", 
+        sliderInput("fractionSecondary", 
                      "Fraction:",
                      min = 0, 
                      max = 1, 

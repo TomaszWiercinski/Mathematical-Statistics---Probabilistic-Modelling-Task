@@ -14,15 +14,22 @@ server <- function(input, output) {
   vals <- reactiveValues(finalBankroll = NULL,
                          simTosses = NULL,
                          kellyCriterion = NULL, 
-                         secondary = FALSE, 
                          finalBankrollSecondary = NULL,
                          coin = NULL)
   
   observeEvent(input$compare, {
-    toggle("fractionSecondary", anim = TRUE, animType = "slide")
-    toggle("currencySecondary", anim = TRUE, animType = "slide")
-    toggle("secondaryTitle", anim = TRUE, animType = "slide")
-    vals$secondary <- !vals$secondary
+    if (input$compare)
+    {
+      show("fractionSecondary", anim = TRUE, animType = "slide")
+      show("currencySecondary", anim = TRUE, animType = "slide")
+      show("secondaryTitle", anim = TRUE, animType = "slide")
+    }
+    else
+    {
+      hide("fractionSecondary", anim = TRUE, animType = "slide")
+      hide("currencySecondary", anim = TRUE, animType = "slide")
+      hide("secondaryTitle", anim = TRUE, animType = "slide")
+    }
   })
   
   # create a coin and calculate the kelly criterion
@@ -36,8 +43,7 @@ server <- function(input, output) {
     validate(
       need(input$tosses != "" && input$tosses > 0, label = "A valid number of tosses"),
       need(input$bankroll != "" && input$bankroll > 0, label = "A valid bankroll"),
-      need(input$seed != "", label = "A valid seed"),
-      need(input$fraction != "" && input$fraction >= 0, label = "A valid fraction")
+      need(input$seed != "", label = "A valid seed")
     )
     
     # simulate tosses
@@ -58,11 +64,8 @@ server <- function(input, output) {
       
     plot(bankroll, type="l")
     
-    if (vals$secondary)
+    if (input$compare)
     {
-      validate(
-        need(input$fractionSecondary != "" && input$fractionSecondary >= 0, label = "A valid secondary fraction")
-      )
       bankrollSecondary <- rep(0, input$tosses + 1)
       bankrollSecondary[1] <- input$bankroll
       
@@ -84,11 +87,12 @@ server <- function(input, output) {
                  vals$finalBankroll,
                  "\n",
                  sep = "")
-    if (vals$secondary)
+    if (input$compare)
       out <- paste(out, 
                    "Final bankroll for the second strategy: ", 
                    vals$finalBankrollSecondary, 
-                   "\n", 
+                   "\nDifference: ",
+                   abs(vals$finalBankrollSecondary - vals$finalBankroll),
                    sep = "")
     cat(out)
   })
@@ -114,7 +118,7 @@ server <- function(input, output) {
     {
       abline(v = vals$kellyCriterion, col = "red")
       offset <- ((vals$kellyCriterion <= .90) - .5) * .1 # ???
-      text(x = vals$kellyCriterion + offset, y = 5, labels = "Kelly criterion", col = "red")
+      text(x = vals$kellyCriterion + offset, y = input$bankroll * 0.05, labels = "Kelly criterion", col = "red")
     }
   })
 }

@@ -4,9 +4,17 @@ library(shinyjs)
 ui <- fluidPage(
   useShinyjs(),
   titlePanel("Kelly Criterion"),
-  
   sidebarLayout(
     sidebarPanel(
+      h3("Coin:"),
+      sliderInput("coinProb",
+                  "Probability of win:",
+                  min = 0,
+                  max = 1,
+                  value = .6,
+                  step = .01),
+      textOutput("coinDesc"),
+      h3("Game options:"),
       numericInput("seed",
                    "Seed:",
                    min = 0,
@@ -24,7 +32,13 @@ ui <- fluidPage(
                    min = 1, 
                    max = 100000, 
                    value = 100,
-                   step = 100),
+                   step = 100)),
+    mainPanel(
+      plotOutput("medianPlot")
+    )),
+  sidebarLayout(
+    sidebarPanel(
+      h3("First strategy:"),
       numericInput("fraction", 
                    "Fraction:",
                    min = 0, 
@@ -35,10 +49,10 @@ ui <- fluidPage(
                     "Use actual currency",
                     value = FALSE),
       actionButton("compare",
-                   "toggle secondary bets",
+                   "Toggle second strategy",
                    value = FALSE),
       hidden(
-        h2(id="secondaryTitle", "Secondary bets options:"),
+        h3(id="secondaryTitle", "Second strategy:"),
         numericInput("fractionSecondary", 
                      "Fraction:",
                      min = 0, 

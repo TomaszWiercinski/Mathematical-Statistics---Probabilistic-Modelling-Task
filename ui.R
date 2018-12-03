@@ -3,6 +3,7 @@ library(shinyjs)
 
 ui <- fluidPage(
   useShinyjs(),
+  withMathJax(),
   titlePanel("Kelly Criterion"),
   sidebarLayout(
     sidebarPanel(
@@ -34,7 +35,9 @@ ui <- fluidPage(
                    value = 100,
                    step = 100)),
     mainPanel(
-      plotOutput("medianPlot")
+      plotOutput("medianPlot"),
+      br(),
+      uiOutput("medianDesc")
     )),
   sidebarLayout(
     sidebarPanel(

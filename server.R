@@ -12,14 +12,22 @@ createCoin <- function(prob) {
 
 server <- function(input, output) {
   
+  # game and second plot values
   vals <- reactiveValues(finalBankroll = NULL,
                          simTosses = NULL,
                          kellyCriterion = NULL, 
                          finalBankrollSecondary = NULL,
                          coin = NULL)
   
+  # values for zoom functionality
   zoomVals <- reactiveValues(x = NULL, y = NULL)
   
+  # values for first plot
+  medianPlotVals <- reactiveValues(successes = NULL,
+                                   stake = seq(from = 0, to = 1, by = .01),
+                                   median_bankroll = NULL)
+  
+  # show and hide secondary bets options
   observeEvent(input$compare, {
     if (input$compare)
     {
@@ -41,6 +49,7 @@ server <- function(input, output) {
     vals$kellyCriterion <- kelly(vals$coin)
   })
   
+  # set zoom values when double clicked
   observeEvent(input$plot_dblclick, {
     brush <- input$plot_brush
     if (!is.null(brush)) {
@@ -53,8 +62,8 @@ server <- function(input, output) {
     }
   })
   
+  # second plot
   output$plot <- renderPlot({
-    
     validate(
       need(input$tosses != "" && input$tosses > 0, label = "A valid number of tosses"),
       need(input$bankroll != "" && input$bankroll > 0, label = "A valid bankroll"),
@@ -100,8 +109,8 @@ server <- function(input, output) {
     plot
   })
   
+  # second plot description
   output$desc <- renderPrint({
-    
     out <- paste("Final bankroll: ", 
                  vals$finalBankroll,
                  "\n",
@@ -116,14 +125,12 @@ server <- function(input, output) {
     cat(out)
   })
   
+  # display kelly criterion in sidebar
   output$coinDesc <- renderText({
     paste("Kelly criterion:", vals$kellyCriterion)
   })
   
-  # median plot ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  medianPlotVals <- reactiveValues(successes = NULL,
-                                   stake = seq(from = 0, to = 1, by = .01),
-                                   median_bankroll = NULL)
+  # calculate median bankroll for first plot
   observe({
     validate({
       need(input$tosses <= 1700, label = "A lower number of tosses")
@@ -135,6 +142,7 @@ server <- function(input, output) {
       (1 - medianPlotVals$stake) ^ (input$tosses - medianPlotVals$successes)
   })
   
+  # first plot
   output$medianPlot <- renderPlot({
     validate(
       need(input$tosses != "" && input$tosses > 0, label = "A valid number of tosses"),
@@ -143,9 +151,9 @@ server <- function(input, output) {
     )
     
     plot <- 
-      ggplot(NULL,
-             aes(y = medianPlotVals$median_bankroll, x = medianPlotVals$stake)) + 
+      ggplot(NULL, aes(y = medianPlotVals$median_bankroll, x = medianPlotVals$stake)) + 
       geom_path()
+    
     if (vals$kellyCriterion >= 0)
     {
       offset <- ((vals$kellyCriterion <= .90) - .5) * .1 # ???
@@ -155,9 +163,19 @@ server <- function(input, output) {
                  label = "Kelly criterion", 
                  x = vals$kellyCriterion + offset, 
                  y = input$bankroll * 0.05, 
-                 size = 4, 
+                 size = 4,
                  colour = "red")
     }
     plot
+  })
+  
+  # first plot description
+  output$medianDesc <- renderUI({
+    withMathJax(paste("\nThe median bankroll for a certain stake can be found with ease using the following equation:",
+                "$$\\text{medianBankroll} = \\text{bankroll}\\cdot(1+\\text{stake})^\\text{successes}\\cdot(1-\\text{stake})^\\text{tosses - successes}$$",
+                "The variable \"successes\" here is the median number of successes for a series of tosses and is equal to the second quantile of a binomial distribution (or in other words - its expected value)",
+                "$$Binom(n = \\text{number of tosses}, p = \\text{probability of winning a toss})$$",
+                "which in the case of this specific game looks like this:",
+                sprintf("$$Binom(n = %d, p = %.02f)$$", input$tosses, input$coinProb), sep = ""))
   })
 }

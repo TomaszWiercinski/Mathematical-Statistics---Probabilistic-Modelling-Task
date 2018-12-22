@@ -1,3 +1,7 @@
+# 3. What is the median return after, say, 1000 (you can choose a different number) tosses 
+#    if you bet 1%, 2%, 3%, ..., 20%, 21%, ... of the bankroll. You can choose a p=0.6 coin 
+#    or a different coin.
+
 library(shiny)
 library(shinyjs)
 library(ggplot2)
